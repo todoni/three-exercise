@@ -14,7 +14,7 @@ export default function Home() {
           shadows
           camera={{
             position: [7, 7, 7],
-            fov: 120,
+            fov: 30,
           }}
         >
           <color attach="background" args={["#404040"]} />

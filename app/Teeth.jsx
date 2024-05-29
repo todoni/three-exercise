@@ -14,10 +14,13 @@ export function Model(props) {
   const { nodes, materials } = useGLTF("/scene.gltf");
   const material = new THREE.MeshBasicMaterial({ wireframe: true });
   console.log(nodes);
+  const matrix = new THREE.Matrix4();
+  matrix.makeRotationX(-Math.PI / 2);
   const handleClick = (e) => {
     console.log(e);
     const geometry = e.object.geometry;
     const positionAttribute = geometry.attributes.position;
+    console.log(positionAttribute);
     const vertex = new THREE.Vector3();
     const clickPosition = new THREE.Vector3(e.point.x, e.point.y, e.point.z);
 
@@ -27,7 +30,9 @@ export function Model(props) {
     console.log(geometry, positionAttribute.count);
     for (let i = 0; i < positionAttribute.count; ++i) {
       const p = vertex.fromBufferAttribute(positionAttribute, i);
+      //const maxtrix =
       //console.log(p);
+      vertex.applyMatrix4(matrix);
       vertex.multiplyScalar(4.135);
       const distance = vertex.distanceTo(clickPosition);
 
@@ -57,10 +62,10 @@ export function Model(props) {
         handleClick(e);
       }}
     >
-      <group rotation={[0, 0, 0]} scale={4.135}>
+      <group rotation={[-Math.PI / 2, 0, 0]} scale={4.135}>
         <group position={[0, 0, 0]}>
           <mesh geometry={nodes.Object_3.geometry} material={material} />
-          <mesh geometry={nodes.Object_5.geometry} material={material} />
+          <mesh geometry={nodes.Object_5.geometry} material={materials.Gums} />
           <mesh geometry={nodes.Object_6.geometry} material={material} />
           <mesh geometry={nodes.Object_7.geometry} material={materials.Teeth} />
         </group>

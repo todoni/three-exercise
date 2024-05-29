@@ -7,45 +7,121 @@ Source: https://sketchfab.com/3d-models/teeth-3a0fb31b9d864b27a0846aca8579461c
 Title: Teeth
 */
 
-import { DragControls, useGLTF } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
+import { useState } from "react";
+import * as THREE from "three";
+
+let index = 0;
 
 export function Model(props) {
   const { nodes, materials } = useGLTF("/scene.gltf");
+  const material = new THREE.MeshBasicMaterial({ wireframe: true });
+  const [pointComponent, setPointComponent] = useState();
+  //console.log(nodes);
+  const handleClick = (e) => {
+    console.log(index);
+    const geometry = e.object.geometry;
+    const positionAttribute = geometry.attributes.position;
+    const vertex = new THREE.Vector3();
+    const curr = vertex.fromBufferAttribute(positionAttribute, index);
+    const clickPosition = new THREE.Vector3().copy(e.point);
+    console.log(clickPosition, curr.distanceTo(clickPosition), e);
+    //positionAttribute.setXYZ(index, curr.x + 0.1, curr.y + 0.1, curr.z + 0.1);
+    console.log(positionAttribute.count);
+    index++;
+    const clickPoint = new THREE.Vector3(e.point.x, e.point.y, e.point.z);
+    const intersections = e.intersections;
+    const vertices = [];
+    vertices.push(clickPoint.x, clickPoint.y, clickPoint.z);
+
+    /*for (let i = 0; i < intersections.length; i++) {
+      const hitPoint = intersections[i].point;
+      const hitVector = new THREE.Vector3(hitPoint.x, hitPoint.y, hitPoint.z);
+      vertices.push(hitVector.x, hitVector.y, hitVector.z);
+    }
+
+    const pointGeometry = new THREE.BufferGeometry();
+    pointGeometry.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(vertices, 3)
+    );*/
+    //const array = new Float32Array(vertices);
+    const array = new Float32Array([
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      ...vertices,
+    ]);
+    //const pointMaterial = new THREE.PointsMaterial({ color: 0xff0000 });
+    //const points = new THREE.Points(pointGeometry, pointMaterial);
+    const PointComponent = (
+      <points>
+        <bufferGeometry attach="geometry">
+          <bufferAttribute
+            attach="attributes-position"
+            array={array}
+            count={array.length / 3}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <pointsMaterial attach="material" color={0xff0000} size={0.1} />
+      </points>
+    );
+    setPointComponent(PointComponent);
+
+    /*let closestVertexIndex = -1;
+    let minDistance = Infinity;
+
+    console.log(geometry, positionAttribute.count);
+    for (let i = 0; i < positionAttribute.count; ++i) {
+      const p = vertex.fromBufferAttribute(positionAttribute, i);
+      //console.log(p);
+      const distance = vertex.distanceTo(clickPosition);
+
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestVertexIndex = i;
+      }
+    }
+    console.log(closestVertexIndex);
+    vertex.fromBufferAttribute(positionAttribute, closestVertexIndex);
+    const newVertexPosition = vertex.clone().addScaledVector(e.normal, 0.1);
+    positionAttribute.setXYZ(
+      closestVertexIndex,
+      newVertexPosition.x,
+      newVertexPosition.y,
+      newVertexPosition.z
+    );*/
+    positionAttribute.needsUpdate = true;
+  };
 
   return (
-    <DragControls mode="translate">
-      <group {...props} dispose={null}>
-        <group rotation={[-Math.PI / 2, 0, 0]} scale={4.135}>
-          <group position={[0, 0, 0]}>
-            <mesh
-              geometry={nodes.Object_3.geometry}
-              material={materials.Gums}
-            />
-            <mesh
-              geometry={nodes.Object_4.geometry}
-              material={materials.Gums}
-            />
-            <mesh
-              geometry={nodes.Object_5.geometry}
-              material={materials.Gums}
-            />
-            <mesh
-              geometry={nodes.Object_6.geometry}
-              material={materials.Teeth}
-            />
-            <mesh
-              geometry={nodes.Object_7.geometry}
-              material={materials.Teeth}
-            />
-            <mesh
-              geometry={nodes.Object_8.geometry}
-              material={materials.Tongue}
-            />
-            <axesHelper />
-          </group>
+    <group
+      {...props}
+      dispose={null}
+      onClick={(e) => {
+        console.log(e);
+        e.stopPropagation();
+        handleClick(e);
+      }}
+    >
+      <group rotation={[0, 0, 0]} scale={4.135}>
+        <group position={[0, 0, 0]}>
+          <mesh geometry={nodes.Object_3.geometry} material={material} />
+          <mesh geometry={nodes.Object_5.geometry} material={material} />
         </group>
       </group>
-    </DragControls>
+      {pointComponent}
+    </group>
   );
 }
 

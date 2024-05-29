@@ -14,15 +14,16 @@ export default function Home() {
           shadows
           camera={{
             position: [7, 7, 7],
-            fov: 30,
+            fov: 120,
           }}
         >
           <color attach="background" args={["#404040"]} />
           <directionalLight position={[10, 10, 10]} castShadow />
           <ambientLight />
-          <Model position={[-1, 0, 1]} />
+          <Model position={[0, 0, 0]} />
           <axesHelper args={[100]} />
-          <OrbitControls makeDefault />
+          <gridHelper />
+          <OrbitControls />
         </Canvas>
         <div
           className={"text-current text-7xl italic font-light z-40 p-5"}

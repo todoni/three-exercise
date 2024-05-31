@@ -2,7 +2,7 @@
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
-import { Model } from "./Teeth";
+import { Stl } from "./Stl";
 
 export default function Home() {
   const axesHelper2 = new THREE.AxesHelper(5);
@@ -13,17 +13,17 @@ export default function Home() {
         <Canvas
           shadows
           camera={{
-            position: [7, 7, 7],
+            position: [100, 100, 100],
             fov: 30,
           }}
         >
           <color attach="background" args={["#404040"]} />
           <directionalLight position={[10, 10, 10]} castShadow />
           <ambientLight />
-          <Model position={[0, 0, 0]} />
+          <Stl />
           <axesHelper args={[100]} />
           <gridHelper />
-          <OrbitControls />
+          <OrbitControls makeDefault />
         </Canvas>
         <div
           className={"text-current text-7xl italic font-light z-40 p-5"}

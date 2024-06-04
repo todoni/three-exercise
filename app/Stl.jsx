@@ -14,6 +14,8 @@ export function Stl(props) {
   });
   const [isDragging, setIsDragging] = useState(false);
   const [selectedVertexIndex, setSelectedVertexIndex] = useState(null);
+  const [points, setPoints] = useState();
+  const [forces, setForces] = useState();
   const ref = useRef();
   const temp = new THREE.Vector3();
   const tempMatrix = new THREE.Matrix4();
@@ -25,6 +27,8 @@ export function Stl(props) {
     const positionAttribute = geometry.attributes.position;
     const vertex = new THREE.Vector3();
     const clickPosition = new THREE.Vector3().copy(e.point);
+    const selectedPoints = [];
+    const selectedForces = [];
 
     let closestVertexIndex = -1;
     let minDistance = Infinity;
@@ -37,8 +41,15 @@ export function Stl(props) {
         minDistance = distance;
         closestVertexIndex = i;
       }
-    }
 
+      const dist = distance / 8;
+      if (dist < 1) {
+        selectedPoints.push(i);
+        selectedForces.push(0.5 + 0.5 * Math.cos(Math.PI * dist));
+      }
+    }
+    setPoints(selectedPoints);
+    setForces(selectedForces.map((v) => v / 3));
     if (closestVertexIndex !== -1) {
       setIsDragging(true);
       setSelectedVertexIndex(closestVertexIndex);
@@ -58,17 +69,45 @@ export function Stl(props) {
     deltaWorldMatrix
   ) => {
     //console.log(localMatrix, deltaLocalMatrix, worldMatrix, deltaWorldMatrix);
+    //console.log(points);
     if (!isDragging || selectedVertexIndex === null) return;
     const geometry = ref.current.children[0].geometry;
     const positionAttribute = geometry.attributes.position;
-    temp.fromBufferAttribute(positionAttribute, selectedVertexIndex);
-    console.log("vec", temp.clone());
+    //temp.fromBufferAttribute(positionAttribute, selectedVertexIndex);
+    //console.log("vec", temp.clone());
     //tempMatrix.multiply(deltaLocalMatrix);
     const matrix = localMatrix.clone().multiply(tempMatrix.invert());
-    temp.applyMatrix4(matrix);
+    const vec = new THREE.Vector3();
+    const mat = new THREE.Matrix4();
+    vec.applyMatrix4(matrix);
+    //console.log(matrix, vec);
+    //var arr = [];
+    for (let i = 0; i < points.length; ++i) {
+      temp.fromBufferAttribute(positionAttribute, points[i]);
+      const tmp = vec.clone().multiplyScalar(forces[i]);
+      mat.makeTranslation(tmp);
+      temp.applyMatrix4(mat);
+      //console.log(forces[i]);
+      //arr.push(points[i]);
+      //console.log(points[i]);
+      //console.log(forces[i], temp.clone());
+      //temp.applyMatrix4(matrix).multiplyScalar(forces[i]);
+      //console.log("after", temp.clone());
+      //const mat = matrix.clone().multiplyS
+      //temp.applyMatrix4(matrix);
+      /*console.log(
+        temp.clone(),
+        " X ",
+        forces[i],
+        " = ",
+        temp.clone().multiplyScalar(forces[i])
+      );*/
+      //temp.multiplyScalar(forces[i]);
+      //console.log("why?", temp.clone());
+      //tempMatrix = deltaLocalMatrix;
+      positionAttribute.setXYZ(points[i], temp.x, temp.y, temp.z);
+    }
     tempMatrix.copy(localMatrix);
-    //tempMatrix = deltaLocalMatrix;
-    positionAttribute.setXYZ(selectedVertexIndex, temp.x, temp.y, temp.z);
     positionAttribute.needsUpdate = true;
   };
 
@@ -80,7 +119,7 @@ export function Stl(props) {
         onDragEnd={handleUp}
         ref={ref}
       >
-        <mesh material={material} name="mandibular">
+        <mesh material={material2} name="mandibular">
           <primitive object={mandibular} />
         </mesh>
       </DragControls>

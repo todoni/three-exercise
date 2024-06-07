@@ -1,3 +1,8 @@
+## Prerequisites
+```
+'npm' 'yarn'
+```
+
 ## Getting Started
 
 First, run the development server:
